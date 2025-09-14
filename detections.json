@@ -1,0 +1,21 @@
+{
+  "session_info": {
+    "start_time": "2025-06-13T16:01:17.401751",
+    "duration_seconds": 30,
+    "total_frames": 54,
+    "total_detections": 54,
+    "unique_objects": 2
+  },
+  "tracked_objects": [
+    {
+      "id": 1,
+      "class": "person",
+      "first_seen_frame": 2,
+      "last_seen_frame": 2,
+      "detection_count": 1,
+      "max_confidence": 0.88,
+      "total_movement": 0,
+      "duration_frames": 1
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveillance System</title>
+  <style>
+    .container { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+    h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
+    .grid { display: grid; gap: 1rem; }
+    @media (min-width: 768px) { .grid { grid-template-columns: 2fr 1fr; } }
+    img { width: 100%; height: auto; }
+    .controls { background-color: #f3f4f6; padding: 1rem; border-radius: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+    label { display: block; margin-bottom: 0.5rem; }
+    input { margin-top: 0.25rem; padding: 0.25rem; width: 100%; border: 1px solid #d1d5db; border-radius: 0.25rem; }
+  </style>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const App = () => {
+      const [config, setConfig] = useState({});
+      const [image, setImage] = useState('');
+      const [remainingTime, setRemainingTime] = useState(0);
+
+      useEffect(() => {
+        const socket = new WebSocket('ws://localhost:5000');
+        socket.onopen = () => console.log('Connected to WebSocket');
+        socket.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.config) setConfig(data.config);
+          if (data.frame) {
+            setImage(data.frame.image);
+            setRemainingTime(data.frame.time);
+          }
+          if (data.config_updated) setConfig(data.config_updated);
+        };
+        socket.onerror = (error) => console.error('WebSocket error:', error);
+        return () => socket.close();
+      }, []);
+
+      const updateConfig = (key, value) => {
+        const socket = new WebSocket('ws://localhost:5000');
+        socket.onopen = () => {
+          socket.send(JSON.stringify({ [key]: value }));
+          socket.close();
+        };
+      };
+
+      return (
+        <div className="container">
+          <h1>Surveillance System</h1>
+          <div className="grid">
+            <div>
+              {image && (
+                <img src={`data:image/jpeg;base64,${image}`} alt="Surveillance Feed" />
+              )}
+              <p>Remaining Time: {remainingTime.toFixed(1)}s</p>
+            </div>
+            <div className="controls">
+              <h2>Controls</h2>
+              <div>
+                <label>
+                  Duration (s):
+                  <input
+                    type="number"
+                    value={config.DURATION_SECONDS || 30}
+                    onChange={(e) => updateConfig('DURATION_SECONDS', parseInt(e.target.value))}
+                  />
+                </label>
+                <label>
+                  Confidence Threshold:
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={config.CONFIDENCE_THRESHOLD || 0.4}
+                    onChange={(e) => updateConfig('CONFIDENCE_THRESHOLD', parseFloat(e.target.value))}
+                  />
+                </label>
+                <label>
+                  IoU Threshold:
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={config.IOU_THRESHOLD || 0.5}
+                    onChange={(e) => updateConfig('IOU_THRESHOLD', parseFloat(e.target.value))}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
