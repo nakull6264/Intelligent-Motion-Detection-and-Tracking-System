@@ -5,7 +5,7 @@ A **real-time motion detection and object tracking system** using **YOLOv8**, **
 ## 🖼️ Screenshots
 
 ### Motion Detection with Pose Estimation
-![image](https://github.com/user-attachments/assets/0237ecb2-e536-4d2b-8f3f-3c5d3d8051f3)
+![image](Screenshot 2025-11-13 211651.png)
 
 
 ### React Frontend UI
